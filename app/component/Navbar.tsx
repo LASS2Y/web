@@ -23,12 +23,17 @@ function NavLink({ href, children, onClick }: NavLinkProps) {
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
   return (
     <nav className="sticky top-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
       <div className="container mx-auto flex justify-between items-center py-4 px-6 max-w-5xl">
         {/* Logo (Placeholder) */}
         <Link
           href="/"
+          onClick={closeMenu}
           className="text-xl font-bold tracking-tight flex items-center gap-2"
         >
           <Image
@@ -43,10 +48,12 @@ export default function Navbar() {
 
         {/* Menu Desktop */}
         <ul className="hidden md:flex gap-8">
-          <NavLink href="#home">Home</NavLink>
-          <NavLink href="#experience">Experience</NavLink>
-          <NavLink href="#projects">Projects</NavLink>
-          <NavLink href="#blog">Blog</NavLink>
+          <NavLink href="/#home">Home</NavLink>
+          <NavLink href="/#experience">Experience</NavLink>
+          <NavLink href="/#projects">Projects</NavLink>
+          <NavLink href="/blog" onClick={closeMenu}>
+            Blog
+          </NavLink>
           <NavLink href="#contact">Contact</NavLink>
         </ul>
 
@@ -54,6 +61,7 @@ export default function Navbar() {
         <button
           className="md:hidden text-2xl"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label="Menu"
         >
           {isMenuOpen ? "✕" : "☰"}
         </button>
@@ -61,19 +69,19 @@ export default function Navbar() {
         {/* Menu Mobile */}
         {isMenuOpen && (
           <ul className="absolute top-full left-0 w-full bg-white dark:bg-black border-b border-gray-200 flex flex-col items-center py-4 space-y-4 md:hidden shadow-lg">
-            <NavLink href="#home" onClick={() => setIsMenuOpen(false)}>
+            <NavLink href="/#home" onClick={closeMenu}>
               Home
             </NavLink>
-            <NavLink href="#experience" onClick={() => setIsMenuOpen(false)}>
+            <NavLink href="/#experience" onClick={closeMenu}>
               Experience
             </NavLink>
-            <NavLink href="#projects" onClick={() => setIsMenuOpen(false)}>
+            <NavLink href="/#projects" onClick={closeMenu}>
               Projects
             </NavLink>
-            <NavLink href="#blog" onClick={() => setIsMenuOpen(false)}>
+            <NavLink href="/#blog" onClick={closeMenu}>
               Blog
             </NavLink>
-            <NavLink href="#contact" onClick={() => setIsMenuOpen(false)}>
+            <NavLink href="/#contact" onClick={closeMenu}>
               Contact
             </NavLink>
           </ul>

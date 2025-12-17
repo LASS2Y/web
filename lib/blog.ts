@@ -1,71 +1,61 @@
 "use server";
 
-import { headers } from "next/headers";
+import { db } from "@/db";
+import { postsTable } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-type BlogPostPageProps = {
-  params: Promise<{ id: string }>;
-};
-
-export default async function BlogPostPage(props: BlogPostPageProps) {
-  const id = Number((await props.params).id);
-  const post = await getPost(id);
-}
-
-type Post = {
-  id: number;
-  title: string;
-  creator: string;
-  content: string;
-};
-
-let posts: Post[] = [];
-let nextId = 1;
-
 export async function getPosts() {
-  return posts;
+  return await db.select().from(postsTable);
 }
 
 export async function getPost(id: number) {
-  return posts.find((p) => p.id === id);
+  const result = await db
+    .select()
+    .from(postsTable)
+    .where(eq(postsTable.id, id))
+    .limit(1);
+
+  return result[0];
 }
 
 export async function createPost(form: FormData) {
   const title = form.get("title")?.toString() || "";
-  const creator = form.get("creator")?.toString() || "";
   const content = form.get("content")?.toString() || "";
 
-  posts.push({
-    id: nextId++,
+  const creator = "Me";
+
+  await db.insert(postsTable).values({
     title,
-    creator,
     content,
+    creator,
   });
 
-  redirect("/posts"); // redirige après création
+  revalidatePath("/blog");
+  redirect("/blog");
 }
 
 export async function editPost(form: FormData) {
   const id = Number(form.get("id"));
   const title = form.get("title")?.toString() || "";
-  const creator = form.get("creator")?.toString() || "";
-  const content = form.get("content")?.toString() || "";
 
-  const index = posts.findIndex((p) => p.id === id);
+  if (id) {
+    await db
+      .update(postsTable)
+      .set({
+        title: title,
+      })
+      .where(eq(postsTable.id, id));
+  }
 
-  if (index === -1) throw new Error("Post not found");
-
-  posts[index] = {
-    ...posts[index],
-    title,
-    creator,
-    content,
-  };
-
-  redirect(`/posts/${id}`); // redirige vers le post modifié
+  revalidatePath("/blog");
+  redirect("/blog");
 }
 
 export async function deletePost(id: number) {
-  posts = posts.filter((p) => p.id !== id);
-  redirect("/posts");
+  if (id) {
+    await db.delete(postsTable).where(eq(postsTable.id, id));
+  }
+  revalidatePath("/blog");
 }

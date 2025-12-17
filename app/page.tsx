@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { logout, getCurrentUser } from "@/lib/auth";
 import Link from "next/link";
 import { getPosts } from "@/lib/blog";
 import profilePic from "./component/pp.jpg";
@@ -76,16 +77,46 @@ function ProjectCard({
 }
 
 export default async function Home() {
+  const user = await getCurrentUser();
   const posts = await getPosts();
 
   return (
     <main className="bg-white dark:bg-black text-gray-900 dark:text-gray-100">
+      {/* --- BARRE DE NAVIGATION / AUTH --- */}
+      <nav className="sticky top-0 z-50 w-full backdrop-blur-md bg-white/70 dark:bg-black/70 border-b border-gray-100 dark:border-zinc-800">
+        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+          <span className="font-bold text-xl tracking-tighter">LL.</span>
+
+          <div className="flex items-center gap-4">
+            {/* Logique d'affichage selon l'utilisateur */}
+            {user ? (
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium hidden sm:block text-green-600">
+                  ● {typeof user === "string" ? user : user?.name || "User"}
+                </span>
+                <form action={logout}>
+                  <button className="text-sm bg-red-50 text-red-600 px-4 py-2 rounded-full hover:bg-red-100 transition">
+                    Logout
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <Link
+                href="/auth"
+                className="text-sm bg-black text-white dark:bg-white dark:text-black px-4 py-2 rounded-full hover:opacity-80 transition"
+              >
+                Login
+              </Link>
+            )}
+          </div>
+        </div>
+      </nav>
       {/* 1. HERO SECTION (HOME) */}
       <section
         id="home"
         className="min-h-[90vh] flex flex-col md:flex-row items-center justify-center container mx-auto px-6 py-20 gap-12"
       >
-        {/* Texte */}
+        {/* Text */}
         <div className="flex-1 text-center md:text-left space-y-6">
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
             Lincoln Lassey
@@ -107,9 +138,7 @@ export default async function Home() {
           </div>
         </div>
 
-        {/* Image Bannière / Portrait */}
         <div className="flex-1 flex justify-center md:justify-end">
-          {/* Image Bannière / Portrait */}
           <div className="relative w-64 h-64 md:w-96 md:h-96 rounded-full overflow-hidden border-4 border-gray-100 dark:border-zinc-800 shadow-2xl">
             <Image
               src={profilePic}
@@ -212,19 +241,19 @@ export default async function Home() {
           </p>
           <div className="flex justify-center gap-6">
             <a
-              href="mailto:tonemail@example.com"
+              href="mailto:lasseylincoln2@gmail.com"
               className="p-4 bg-gray-100 dark:bg-zinc-800 rounded-full hover:bg-blue-100 hover:text-blue-600 transition"
             >
               Email
             </a>
             <a
-              href="#"
+              href="https://www.linkedin.com/feed/"
               className="p-4 bg-gray-100 dark:bg-zinc-800 rounded-full hover:bg-blue-100 hover:text-blue-600 transition"
             >
               LinkedIn
             </a>
             <a
-              href="#"
+              href="https://github.com/LASS2Y"
               className="p-4 bg-gray-100 dark:bg-zinc-800 rounded-full hover:bg-blue-100 hover:text-blue-600 transition"
             >
               GitHub
@@ -232,6 +261,10 @@ export default async function Home() {
           </div>
         </div>
       </section>
+      {/* Footer simple */}
+      <footer className="py-6 text-center text-sm text-gray-500 border-t dark:border-zinc-800">
+        © {new Date().getFullYear()} Lincoln Lassey. Built with Next.js.
+      </footer>
     </main>
   );
 }
